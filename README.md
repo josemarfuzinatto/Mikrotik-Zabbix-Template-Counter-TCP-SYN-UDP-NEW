@@ -1,5 +1,6 @@
 # Tamplate Contador de Pacotes TCP/SYN e UDP/NEW
 SYN/TCP e UDP/NEW basicamente são pacotes de abertura de novas conexões, cada tipo de seu protocolo.
+
 Contando eles é possível se ter um panorama geral de quantidade de conexões TCP e UDP em PPS e Bytes.
 
 Em cenários onde se usa CCR2216 com Offload corretamente configurado, os pacotes de abertura são basicamente os únicos pacotes que "sobem" para a CPU antes da rota ser instalada no hardware. POR ISSO, é importante contabiliza-los.
