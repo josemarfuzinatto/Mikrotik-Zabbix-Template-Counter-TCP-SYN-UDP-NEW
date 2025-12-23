@@ -1,4 +1,4 @@
-# Tamplate Contador de Pacotes TCP/SYN e UDP/NEW
+# Template Contador de Pacotes TCP/SYN e UDP/NEW
 SYN/TCP e UDP/NEW basicamente são pacotes de abertura de novas conexões, cada tipo de seu protocolo.
 
 Contando eles é possível se ter um panorama geral de quantidade de conexões TCP e UDP em PPS e Bytes.
@@ -7,7 +7,7 @@ Em cenários onde se usa CCR2216 com Offload corretamente configurado, os pacote
 
 Também é possivel pegar ataques DDoS do tipo SYN Flood e qualquer amplificação UDP (53 e 123 por exemplo)
 
-O Tamplate é feito para Zabbix 7 e cria uma Dashboard para o equipamento com os dados analisados. DICA: Compare o gráfico de UDP/PPS com o grafico de CPU de seu Mikrotik e veja exatamente quando se teve DDoS.
+O Template é feito para Zabbix 7 e cria uma Dashboard para o equipamento com os dados analisados. DICA: Compare o gráfico de UDP/PPS com o grafico de CPU de seu Mikrotik e veja exatamente quando se teve DDoS.
 
 ### PASSO A PASSO:
 ## 1 - Habilitar uma comunidade SNMP com permissão de escrita 
