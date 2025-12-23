@@ -64,7 +64,7 @@ Use o nome que quiser, eu chamo de "get_counters_tcp_udp_json"
 ```
 
 ## 3 - Identificar o correto ID do Script com SNMP Walk:
-snmpwalk -v2c -c <comm> <ip> 1.3.6.1.4.1.14988.1.1.8.1.1.2
+snmpwalk -v2c -c comunity <ip> 1.3.6.1.4.1.14988.1.1.8.1.1.2
 
 ## 4 - Substituir na macro {$IDSCRIPT} pelo ID correspondente ao adicionar o script no Host. 
 (pode criar o item macro no host mesmo) e usar a entrada "{$IDSCRIPT}" apontando para o value X (numero encontrado do script).
