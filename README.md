@@ -85,7 +85,7 @@ verá um resultado como: <br>
 ## 4 - Identificar o correto ID do Script com SNMP Walk:
 snmpwalk -v2c -c comunity ip 1.3.6.1.4.1.14988.1.1.8.1.1.2
 
-## 5 - Importar o tamplate para o Zabbix
+## 5 - Importar o template para o Zabbix
 Feito para Zabbix 7.
 
 ## 6 - Adicionar o Host criando a macro {$IDSCRIPT} com o ID correspondente ao Script. 
