@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2026-01-02T20:42:17Z</date>
+    <groups>
+        <group>
+            <name>Mikrotik</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Mikrotik - TCP Syn e UDP New - Counters</template>
+            <name>Mikrotik - TCP Syn e UDP New - Counters</name>
+            <description>Author: Josemar Fuzinatto &amp; GPT&#13;
+&#13;
+#substituir na macro o ID do script, possivel pegar o ID no comando:&#13;
+#comunidade SNMP tem que permitir escrita&#13;
+snmpwalk -v2c -c &lt;comm&gt; &lt;ip&gt; 1.3.6.1.4.1.14988.1.1.8.1.1.2&#13;
+&#13;
+/ip firewall filter&#13;
+add action=passthrough chain=forward comment=MONITOR_TCP_SYN_COUNT connection-state=new protocol=tcp tcp-flags=syn&#13;
+add action=passthrough chain=forward comment=MONITOR_UDP_NEW_COUNT connection-state=new protocol=udp&#13;
+&#13;
+Script:&#13;
+:local output &quot;{&quot;&#13;
+:local first true&#13;
+&#13;
+# Lista exata dos comentarios&#13;
+:local listaRegras {&quot;MONITOR_TCP_SYN_COUNT&quot;; &quot;MONITOR_UDP_NEW_COUNT&quot;}&#13;
+&#13;
+:foreach nomeRegra in=$listaRegras do={&#13;
+    # Busca os IDs. Isso retorna uma lista/array.&#13;
+    :local foundIDs [/ip firewall filter find comment=$nomeRegra]&#13;
+    &#13;
+    # Verifica se a lista nao esta vazia&#13;
+    :if ([:len $foundIDs] &gt; 0) do={&#13;
+        &#13;
+        # Pegamos apenas o primeiro ID da lista para garantir&#13;
+        :local singleID [:pick $foundIDs 0]&#13;
+        &#13;
+        # Inicializa variaveis para evitar erro&#13;
+        :local packets 0&#13;
+        :local bytes 0&#13;
+        &#13;
+        # Tenta pegar os valores&#13;
+        :do {&#13;
+            :set packets [/ip firewall filter get $singleID packets]&#13;
+            :set bytes   [/ip firewall filter get $singleID bytes]&#13;
+        } on-error={&#13;
+            :put (&quot;Erro ao ler dados da regra: &quot; . $nomeRegra)&#13;
+        }&#13;
+        &#13;
+        # Logica da virgula&#13;
+        :if ($first = false) do={ :set output ($output . &quot;,&quot;) }&#13;
+        :set first false&#13;
+        &#13;
+        # Monta o JSON&#13;
+        :set output ($output . &quot;\&quot;&quot; . $nomeRegra . &quot;\&quot;: {\&quot;packets\&quot;: &quot; . $packets . &quot;, \&quot;bytes\&quot;: &quot; . $bytes . &quot;}&quot;)&#13;
+        &#13;
+    } else={&#13;
+        # Debug: Se nao achar a regra, avisa no terminal para voce saber&#13;
+        :put (&quot;AVISO: Nao encontrei nenhuma regra com o comentario: &quot; . $nomeRegra)&#13;
+    }&#13;
+}&#13;
+&#13;
+:set output ($output . &quot;}&quot;)&#13;
+&#13;
+# Imprime o JSON final&#13;
+:put $output</description>
+            <groups>
+                <group>
+                    <name>Mikrotik</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <name>Stats TCP Syn &amp; UDP New JSON</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>1.3.6.1.4.1.14988.1.1.18.1.1.2.{$IDSCRIPT}</snmp_oid>
+                    <key>script.json</key>
+                    <delay>15s</delay>
+                    <history>31d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                </item>
+                <item>
+                    <name>Counter: TCP SYN (Bytes/sec)</name>
+                    <type>DEPENDENT</type>
+                    <key>tcp_syn.bytes</key>
+                    <delay>0</delay>
+                    <history>31d</history>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.MONITOR_TCP_SYN_COUNT.bytes</params>
+                        </step>
+                        <step>
+                            <type>CHANGE_PER_SECOND</type>
+                            <params/>
+                        </step>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>8</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>script.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Counter: TCP SYN (Packets/sec)</name>
+                    <type>DEPENDENT</type>
+                    <key>tcp_syn.pps</key>
+                    <delay>0</delay>
+                    <history>31d</history>
+                    <value_type>FLOAT</value_type>
+                    <units>pps</units>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.MONITOR_TCP_SYN_COUNT.packets</params>
+                        </step>
+                        <step>
+                            <type>CHANGE_PER_SECOND</type>
+                            <params/>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>script.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Counter: UDP NEW (Bytes/sec)</name>
+                    <type>DEPENDENT</type>
+                    <key>udp_syn.bytes</key>
+                    <delay>0</delay>
+                    <history>31d</history>
+                    <value_type>FLOAT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.MONITOR_UDP_NEW_COUNT.bytes</params>
+                        </step>
+                        <step>
+                            <type>CHANGE_PER_SECOND</type>
+                            <params/>
+                        </step>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>8</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>script.json</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Counter: UDP NEW (Packets/sec)</name>
+                    <type>DEPENDENT</type>
+                    <key>udp_syn.pps</key>
+                    <delay>0</delay>
+                    <history>31d</history>
+                    <value_type>FLOAT</value_type>
+                    <units>pps</units>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.MONITOR_UDP_NEW_COUNT.packets</params>
+                        </step>
+                        <step>
+                            <type>CHANGE_PER_SECOND</type>
+                            <params/>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>script.json</key>
+                    </master_item>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$IDSCRIPT}</macro>
+                    <value>9999</value>
+                    <description>substituia pelo id correto encontrado com: snmpwalk -v2c -c &lt;comm&gt; &lt;ip&gt; 1.3.6.1.4.1.14988.1.1.8.1.1.2</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <graphs>
+        <graph>
+            <name>Counter TCP SYN &amp; UDP NEW Bytes</name>
+            <graph_items>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Mikrotik - TCP Syn e UDP New - Counters</host>
+                        <key>tcp_syn.bytes</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>2</sortorder>
+                    <color>FF0000</color>
+                    <item>
+                        <host>Mikrotik - TCP Syn e UDP New - Counters</host>
+                        <key>udp_syn.bytes</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>Counter TCP SYN &amp; UDP NEW PPS</name>
+            <graph_items>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Mikrotik - TCP Syn e UDP New - Counters</host>
+                        <key>tcp_syn.pps</key>
+                    </item>
+                </graph_item>
+                <graph_item>
+                    <sortorder>2</sortorder>
+                    <color>FF0000</color>
+                    <item>
+                        <host>Mikrotik - TCP Syn e UDP New - Counters</host>
+                        <key>udp_syn.pps</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>Counter TCP SYN Bytes</name>
+            <graph_items>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Mikrotik - TCP Syn e UDP New - Counters</host>
+                        <key>tcp_syn.bytes</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>Counter TCP SYN PPS</name>
+            <graph_items>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Mikrotik - TCP Syn e UDP New - Counters</host>
+                        <key>tcp_syn.pps</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>Counter UDP NEW Bytes</name>
+            <graph_items>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Mikrotik - TCP Syn e UDP New - Counters</host>
+                        <key>udp_syn.bytes</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+        <graph>
+            <name>Counter UDP NEW PPS</name>
+            <graph_items>
+                <graph_item>
+                    <sortorder>1</sortorder>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Mikrotik - TCP Syn e UDP New - Counters</host>
+                        <key>udp_syn.pps</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+</zabbix_export>
