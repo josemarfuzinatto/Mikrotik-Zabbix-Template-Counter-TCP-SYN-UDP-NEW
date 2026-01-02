@@ -87,7 +87,7 @@ verá um resultado como: <br>
 snmpwalk -v2c -c comunity ip 1.3.6.1.4.1.14988.1.1.8.1.1.2
 
 ## 5 - Importar o template para o Zabbix
-Feito para Zabbix 7.
+Feito para Zabbix 6 e 7.
 
 ## 6 - Adicionar o Host criando a macro {$IDSCRIPT} com o ID correspondente ao Script. 
 (pode criar o item macro no host mesmo) e usar a entrada "{$IDSCRIPT}" apontando para o value X (numero encontrado do script).
@@ -191,7 +191,7 @@ you will see a result like: <br>
 snmpwalk -v2c -c comunity ip 1.3.6.1.4.1.14988.1.1.8.1.1.2
 
 ## 5 - Import the template into Zabbix
-Made for Zabbix 7.
+Made for Zabbix 6 and 7.
 
 ## 6 - Add the Host creating the macro {$IDSCRIPT} with the ID corresponding to the Script. 
 (you can create the macro item in the host itself) and use the entry "{$IDSCRIPT}" pointing to the value X (the script number found).
